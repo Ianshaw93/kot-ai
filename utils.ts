@@ -3,11 +3,15 @@ import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter'
 import { OpenAI } from 'langchain/llms/openai'
 import { timeout } from './config'
 import { PromptTemplate } from 'langchain/prompts'
+import { CallbackManager } from 'langchain/callbacks'
+import { EmbeddingsParams, Embeddings } from "langchain/embeddings/base";
+
 
 export const queryPineconeVectorStoreAndQueryLLM = async (
   client,
   indexName,
-  question
+  question, 
+  historyArray=[] // save in state? -> use array 
 ) => {
 
   console.log('Querying Pinecone vector store...');
@@ -25,6 +29,7 @@ export const queryPineconeVectorStoreAndQueryLLM = async (
     },
   });
   console.log(`Found ${queryResponse.matches.length} matches...`);
+  // TODO: include convesation in the below:
   if (queryResponse.matches.length) {
     const llm = new OpenAI({});
     const prompt = new PromptTemplate({
@@ -38,13 +43,22 @@ export const queryPineconeVectorStoreAndQueryLLM = async (
       However, in this case, you may answer the closest related question possible using the context, but INCLUDE THE RELATED QUESTION IN THE ANSWER.
   `,
     });
+    // @ts-ignore
+    historyArray.push(`User: ${question}\n`)
+    // TODO: last 10 entries
+    if (historyArray.length > 10) {
+      historyArray = historyArray.slice(-10)
+    }
+    
+    let historyString = historyArray.join('')
+
     // Extract and concatenate page content from matched documents
     const concatenatedPageContent = queryResponse.matches//[0].metadata.text
     .map((match) => match.metadata.text)
     .join(" ");
 
     const formattedPrompt = await prompt.format({
-      context: concatenatedPageContent,
+      context: historyString + concatenatedPageContent,
       question: question,
     });
     console.log(formattedPrompt)
@@ -52,10 +66,12 @@ export const queryPineconeVectorStoreAndQueryLLM = async (
     const result = await llm.call(
       formattedPrompt
     );
+    // @ts-ignore
+    historyArray.push(`Agent: ${result}\n`)
 
     console.log(`Answer: ${result}`);
 
-    return result
+    return [historyArray, result]
   } else {
 
     console.log('Since there are no matches, GPT-3 will not be queried.');

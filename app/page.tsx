@@ -4,6 +4,7 @@ import { useState } from 'react'
 export default function Home() {
   const [query, setQuery] = useState('')
   const [result, setResult] = useState('')
+  const [history, setHistory] = useState([])
   const [loading, setLoading] = useState(false)
   async function createIndexAndEmbeddings() {
     try {
@@ -23,10 +24,11 @@ export default function Home() {
     try {
       const result = await fetch('/api/read', {
         method: "POST",
-        body: JSON.stringify(query)
+        body: JSON.stringify({history, query})
       })
       const json = await result.json()
       setResult(json.data)
+      setHistory(json.history)
       setLoading(false)
     } catch (err) {
       console.log('err:', err)
