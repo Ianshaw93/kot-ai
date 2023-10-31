@@ -45,9 +45,9 @@ export default function Home() {
     // TODO: move input to bottom
     // have whatsapp style message boxes
     <main className="flex flex-col items-center justify-between">
-      <div className="min-h-screen bg-gradient-to-t from-gray-600 via-gray-400 to-gray-600 overflow-y-auto">
+      <div className="min-h-screen bg-gray-400 overflow-y-auto">
         {
-          history && history.map((item, index) => {
+          history.map((item, index) => {
             console.log('item:', item)
             return (<div 
               className={`

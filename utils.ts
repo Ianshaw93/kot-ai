@@ -35,12 +35,12 @@ export const queryPineconeVectorStoreAndQueryLLM = async (
     const prompt = new PromptTemplate({
       inputVariables: ["context", "question"],
       template: `
-      The context if from the kneesovertoesguy. You are giving advice to a client using his teachings. 
-      Use only the information in the context to answer the question.
+      The context is from the kneesovertoesguy. You are giving advice to a client using his teachings. 
+      Use only non technical human anatomy knowledge and terms and the information in the context to answer the question. The client cannot see the context, therefore make your answer complete. Include only relevant info, if they want to strengthen the elbow, only include exercises to strengthen and improve mobility around the elbow. 
       Context: {context}
       Question: {question}
       If you cannot find the answer from the info in the context, DO NOT MAKE UP AN ANSWER. 
-      However, in this case, you may answer the closest related question possible using the context, but INCLUDE THE RELATED QUESTION IN THE ANSWER.
+      However, in this case, you may answer the closest related question possible using the context.
   `,
     });
     // @ts-ignore
