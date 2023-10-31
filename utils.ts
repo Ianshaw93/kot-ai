@@ -44,7 +44,7 @@ export const queryPineconeVectorStoreAndQueryLLM = async (
   `,
     });
     // @ts-ignore
-    historyArray.push(`User: ${question}\n`)
+    historyArray.push({"source": "user", "message": question})
     // TODO: last 10 entries
     if (historyArray.length > 10) {
       historyArray = historyArray.slice(-10)
@@ -67,7 +67,8 @@ export const queryPineconeVectorStoreAndQueryLLM = async (
       formattedPrompt
     );
     // @ts-ignore
-    historyArray.push(`Agent: ${result}\n`)
+    historyArray.push({"source": "agent", "message": result})
+
 
     console.log(`Answer: ${result}`);
 

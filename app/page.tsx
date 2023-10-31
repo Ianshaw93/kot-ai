@@ -1,11 +1,12 @@
 'use client'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 export default function Home() {
   const [query, setQuery] = useState('')
   const [result, setResult] = useState('')
   const [history, setHistory] = useState([])
   const [loading, setLoading] = useState(false)
+  const textAreaRef = useRef(null);
   async function createIndexAndEmbeddings() {
     try {
       const result = await fetch('/api/setup', {
@@ -30,23 +31,42 @@ export default function Home() {
       setResult(json.data)
       setHistory(json.history)
       setLoading(false)
+      setQuery('')
+      // textAreaRef.current.focus()
+      // textAreaRef.current = ''
+
+      console.log("full history: ", json.history)
     } catch (err) {
       console.log('err:', err)
       setLoading(false)
     }
   }
   return (
-    <main className="flex flex-col items-center justify-between p-24">
-      <input className='text-black px-2 py-1' onChange={e => setQuery(e.target.value)} />
-      <button className="px-7 py-1 rounded-2xl bg-white text-black mt-2 mb-2" onClick={sendQuery}>Ask AI</button>
-      {
-        loading && <p>Asking AI ...</p>
-      }
-      {
-        result && <p>{result}</p>
-      }
-      { /* consider removing this button from the UI once the embeddings are created ... */}
-      {/* <button>Create index and embeddings</button> */}
+    // TODO: move input to bottom
+    // have whatsapp style message boxes
+    <main className="flex flex-col items-center justify-between">
+      <div className="min-h-screen bg-gradient-to-t from-gray-600 via-gray-400 to-gray-600 overflow-y-auto">
+        {
+          history && history.map((item, index) => {
+            console.log('item:', item)
+            return (<div 
+              className={`
+              rounded-xl bg-white px-1 mx-5 mb-3 shadow-lg shadow-gray-600 max-w-[80%] 
+              ${item.source === 'user' ? 'ml-auto' : 'mr-auto'}
+            `}
+              key={index}>{item.message}</div>)
+          })
+        }
+        {
+          loading && <p>Asking AI ...</p>
+        }
+
+      </div>
+        <div className="flex flex-col items-center justify-center bg-gradient-to-t from-gray-600 via-gray-400 to-gray-600 p-4 fixed bottom-4 w-full">
+          <textarea className='text-black py-1 max-w-[80%] center' cols={40} onChange={e => setQuery(e.target.value)}/>
+          <button className="px-7 py-1 rounded-2xl bg-white text-black mt-2 mb-2 max-w-[80%]" onClick={sendQuery}>Ask AI</button>
+        </div>
+
     </main>
   )
 }
